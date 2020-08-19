@@ -1,11 +1,11 @@
 import axios from 'axios';
 //constants
 const initialCart = {
-        products: [],
-        countCart: 0,
-        totalPrice: 0,
-    }
-    //types
+    products: [],
+    countCart: 0,
+    totalPrice: 0,
+}
+//types
 const ADD_TO_CART = 'ADD_TO_CART'
 const SET_INITIAL_CART = 'SET_INITIAL_CART'
 const REMOVE_ITEM_CART = 'REMOVE_ITEM_CART'
@@ -13,7 +13,7 @@ const GET_PRODUCT_SUCCESS = 'GET_PRODUCT_SUCCESS'
 const ADD_QUANTITY = 'ADD_QUANTITY';
 const SUB_QUANTITY = 'SUB_QUANTITY';
 const REMOVE_CART = 'REMOVE_CART'
-    //reducers
+//reducers
 export default function cartReducer(state = initialCart, action) {
     switch (action.type) {
         case GET_PRODUCT_SUCCESS:
@@ -22,36 +22,33 @@ export default function cartReducer(state = initialCart, action) {
                 products: action.payload
             }
         case ADD_TO_CART:
-            console.log(action.product.product_quantity)
-            return {
-                ...state,
-                products: state.products.map(item => item.product_id === action.product_id ? 
-                    {...item, product_cart: true } : item),
-                    /* products: state.products.map(item =>
-                         item.product_id === action.product.product_id ? {
-                             ...item,
-                             product_cart: true,
-                             product_quantity: item.product_quantity + 1
-                         } : item,
-                     ),*/
-                totalPrice: state.totalPrice + action.product.product_price,
-                countCart: state.products.filter(item => item.product_cart === true)
-                    .map(item => item.product_quantity).reduce((prev, next) =>
-                        prev + next, 0)
-            }
-        case ADD_QUANTITY:
+            console.log(action.product.product_title + ": " + action.product.product_quantity + " = $" + action.product.product_price)
             return {
                 ...state,
                 products: state.products.map(item =>
                     item.product_id === action.product.product_id ? {
-                        ...item,
+                        ...item, product_cart: true,
                         product_quantity: item.product_quantity + 1
                     } : item
                 ),
                 totalPrice: state.totalPrice + action.product.product_price,
                 countCart: state.products.filter(item => item.product_cart === true)
                     .map(item => item.product_quantity).reduce((prev, next) =>
-                        prev + 1, 0)
+                        prev + next, 1)
+            }
+        case ADD_QUANTITY:
+            return {
+                ...state,
+                products: state.products.map(item =>
+                    item.product_id === action.product.product_id ? {
+                        ...item, product_cart: true,
+                        product_quantity: item.product_quantity + 1
+                    } : item
+                ),
+                totalPrice: state.totalPrice + action.product.product_price,
+                countCart: state.products.filter(item => item.product_cart === true)
+                    .map(item => item.product_quantity).reduce((prev, next) =>
+                        prev + next, 0)
             }
         case SUB_QUANTITY:
             return {
@@ -61,7 +58,7 @@ export default function cartReducer(state = initialCart, action) {
                         ...item,
                         product_quantity: item.product_quantity !== 1 ? item.product_quantity - 1 : 1,
                     } :
-                    item,
+                        item,
                 ),
                 totalPrice: action.product.product_quantity === 1 ?
                     state.totalPrice + 0 : state.totalPrice - action.product.product_price,
@@ -113,8 +110,7 @@ export const removeCart = () => (dispatch) => {
     })
 }
 
-export const getProductSuccess = () => async(dispatch) => {
-    /*
+export const getProductSuccess = () => async (dispatch) => {
     if (localStorage.getItem('localCart')) {
         const localCart = JSON.parse(localStorage.getItem('localCart'))
         dispatch({
@@ -123,12 +119,11 @@ export const getProductSuccess = () => async(dispatch) => {
         })
         return
     }
-    */
     try {
         const res = await axios.get('https://resourse.tribca.cl/product')
         const response = res.data.map(item => item.product_quantity != null ? {
             ...item,
-            product_quantity: 1,
+            product_quantity: 0,
             product_price: parseInt(item.product_price),
             product_cart: false
         } : null)
